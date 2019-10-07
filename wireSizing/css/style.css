@@ -1,0 +1,13 @@
+hr {
+  color: black;
+  background-color: black;
+  border-width: 3px;
+  border-color: black;
+}
+
+.textBox {
+  margin: 2.5%;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: lightgrey;
+}

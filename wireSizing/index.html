@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+  <head>
+    <title>
+    PV System Wire Sizing and Voltage Drop Tool
+    </title>
+  </head>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<!-- AngularJS CDN -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+
+<link rel="stylesheet" href="css/style.css">
+
+<body>
+
+  <div ng-app="myApp" ng-controller="myCtrl">
+
+    <div class="textBox">
+      <center> <h1> PV System Wire Sizing and Voltage Drop Tool </h1> </center>
+    <br>
+     Disclaimer: <i> This is an online tool for speeding up the process of selecting wire sizes and types. Please do not finalize any engineering designs or drawings without the review and  approval of a licensed professional engineer. </i>
+     <br>
+     Assumptions and Conditions:
+     <ol>
+       <li> This application only consider wire sizes from 12awg to 2000kcmil for DC calculations, and 12awg to 1000kcmil for AC calculations. </li>
+       <li> The values used for calculation come from the NEC 2017 codebook. Specific tables are noted in the app text. </li>
+       <li> The wire (conductor) ampacity calculations assume not more than 3 current-carrying conductors direct buried or in raceway. </li>
+       <li> The DC voltage drop calculations assume 7 strand, uncoated conductors. </li>
+       <li> The AC voltage drop calculations assume PVC conduit. </li>
+       <li> Voltage drop calculations use Tables 8 and 9, from Chapter 9, NEC 2017. These conductor properties are for 75C (167F). (Refer to NEC 2017 for more info.)</li>
+       <li> App creator assumes user has knowledge of electrical engineering and/or of relevant equations and use cases to comprehend/apply the data presented by the app. </li>
+     </ol>
+     </div>
+
+    <div class="textBox">
+    <h4> Enter Wire Parameters Here: </h4>
+    Wire Name: <input type="text" ng-model="wireName">
+    Number of Devices Feeding Currents to Wire: <input type="text" ng-model="wireNum">
+    Normal Operating Current of Each Device Feeding Wire (A): <input type="text" ng-model="wireCurrent">
+    <br>
+    Number of Wires in Parallel (Current Carrying, Treat 3-ph as just 1): <input type="text" ng-model="condNum">
+    <br>
+
+    Wire Size:
+    <select ng-model="wireSize">
+        <option ng-repeat="x in selWireSize">{{x}}</option>
+    </select>
+
+    Wire Metal Type:
+    <select ng-model="wireMetal">
+        <option ng-repeat="x in selWireMetal">{{x}}</option>
+    </select>
+
+    Rated Temp (for Ampacity) (degrees C):
+    <select ng-model="ampTemp">
+        <option ng-repeat="x in selAmpTemp">{{x}}</option>
+    </select>
+
+    <br>
+
+    Wire Distance (ft): <input type="text" ng-model="wireDist">
+
+    Current Type:
+    <select ng-model="currentType">
+        <option ng-repeat="x in currentTypes">{{x}}</option>
+    </select>
+
+    Base Voltage: <input type="text" ng-model="vBase">
+
+    Power Factor (AC only): <input type="text" ng-model="vPF">
+
+    <br>
+
+    Target/Threshold Voltage Drop (in %): <input type="text" ng-model="vDropThres">
+
+    <br>
+
+    PV Module Impp (A) (ONLY ENTER VALUE IF WIRING TO SOLAR PANEL): <input type="text" ng-model="PVImp">
+
+<!--
+  <p>
+  <strong> {{wireName}} </strong>
+  </p><p>
+  <strong> Wire Size </strong>  {{wireSize}},
+  <strong> Wire Metal </strong> {{wireMetal}},
+  <strong> Wire Rated Temperature </strong> {{ampTemp}}
+  <br>
+  <strong> Wire Distance </strong> {{wireDist}},
+  <strong> Current Type </strong> {{currentType}}
+  </p>
+-->
+  <br><br>
+  <button onclick="javascript: window.print()"> Print Page! </button>
+  <button ng-click="addWire()">Add Wire!</button>
+
+  </div>
+
+  <div class="textBox" style="background-color: white;">
+    <ul class="list-group">
+
+      <li class="list-group-item-primary"> Here are your wire calculations: </li>
+      <li class="list-group-item" ng-repeat="x in savedWires">
+          <h5>
+          <b> Wire Name: </b>
+          <input type="text" ng-model="x.wireName">
+           <br>
+
+          <b> Wire Size: </b>  {{x.wireSize}},
+          <b> Wire Metal: </b>  {{x.wireMetal}},
+          <b> Wire Rated Temperature: </b>  {{x.ampTemp}}
+          <br>
+          <b> Wire Distance (ft): </b>  {{x.wireDist}},
+          <b> Current Type: </b>  {{x.currentType}},
+          <b> Base Voltage: </b>  {{x.vBase}},
+          <b> Power Factor (AC only): </b>  {{x.vPF}}
+          <br>
+          <b> Target/Threshold Voltage Drop (in %): </b>  {{x.vDropThres}} <br>
+          <b> PV Module Imp (A) (in %): </b>  {{x.PVImp}}
+          </h5>
+
+          <h4>  Wire Ampacity (NEC 2017 310.15(B)(16)): <b>  {{x.ampacity}}A </b> <br>
+            Operating Current (#Devices*i*{{x.ampFact}}/#Wires): <b> {{x.wireNum}} * {{x.wireCurrent}} / {{x.condNum}} (A)  x {{x.ampFact}} = {{(x.wireNum * x.wireCurrent / x.condNum).toFixed(4)}}A x {{x.ampFact}} = {{(x.wireNum * x.wireCurrent*x.ampFact).toFixed(4)}}A </b> <br>
+          <div ng-switch on="x.ampGood">
+              <div ng-switch-when="true" style="color: green"> Ampacity Rating Good </div>
+              <div ng-switch-default style="color: red"> Current Above Rating </div>
+          </div>
+          </h4>
+          ===============================================================================
+          <h4>
+          <b>  Suggested Breaker Size: </b> {{x.recBreaker}} <br>
+          <div ng-switch on="x.breakerGood">
+              <div ng-switch-when="true" style="color: green"> Breaker Ampacity Rating Good </div>
+              <div ng-switch-default style="color: red"> Breaker Current Above Rating <br>
+                Recommended Wire: {{x.recWire[1]}}, {{x.wireMetal}} with ampacity {{x.recWire[0]}}A
+                {{ (x.condNum > 1 ? 'x ' + x.condNum + ' = ' + x.condNum*x.recWire[0] + 'A': null ) }}
+                <br>
+                Recommended Wire(2): {{x.recWire2[1]}}, {{x.wireMetal === "Copper" ? "Aluminum" : "Copper"}} with ampacity {{x.recWire2[0]}}A
+                {{ (x.condNum > 1 ? ' x ' + x.condNum + ' = ' + x.condNum*x.recWire2[0] + 'A' : null ) }}
+                <br>
+              </div>
+          </div>
+          </h4>
+          ===============================================================================
+          <h3> Voltage Drop: <b> {{x.vDrop}}% </b> <br>
+           Distance for {{x.vDropThres}}% Voltage Drop: <b> {{x.vDropThresDist}} ft </b>
+          </h3>
+
+          <br>
+          <button ng-click="removeWire($index)"> Delete This Entry </button>
+        </li>
+    </ul>
+
+    <p> <i>
+      <b> DC Voltage-Drop Calculation: </b> ((factor=2)*(current (A))*(dist)*(ohms/kft)/1000)/(voltage base) </i>  -   [NEC 2017 ohms/kft: Ch 9. Tb 8. - 7 strand, uncoated]
+      <br>
+      <i> <b> AC Voltage-Drop Calculation: </b> sqrt(3)*(current (A)) * [ (dist*XR/1000) * cos(acos(PF)) + (dist*XL/1000) * sin(acos(PF))] / voltage base  </i> -   [NEC 2017 ohms/kft: Ch 9. Tb 9. - In PVC, 7 strand, uncoated]
+      <br>
+     </p>
+    </div>
+
+  </div>
+
+<script src="js/index.js"></script>
+</body>
+</html>
