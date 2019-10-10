@@ -129,7 +129,7 @@
           </h5>
 
           <h4>  Wire Ampacity (NEC 2017 310.15(B)(16)): <b>  {{x.ampacity}}A </b> <br>
-            Operating Current (#Devices*i*{{x.ampFact}}/#Wires): <b> {{x.wireNum}} * {{x.wireCurrent}} / {{x.condNum}} (A)  x {{x.ampFact}} = {{(x.wireNum * x.wireCurrent / x.condNum).toFixed(4)}}A x {{x.ampFact}} = {{(x.wireNum * x.wireCurrent*x.ampFact).toFixed(4)}}A </b> <br>
+            Operating Current (#Devices*i*{{x.ampFact}}/#Wires): <b> {{x.wireNum}} * {{x.wireCurrent}} / {{x.condNum}} (A)  x {{x.ampFact}} = {{(x.wireNum * x.wireCurrent / x.condNum).toFixed(4)}}A x {{x.ampFact}} = {{(x.wireNum * x.wireCurrent*x.ampFact/x.condNum).toFixed(4)}}A </b> <br>
           <div ng-switch on="x.ampGood">
               <div ng-switch-when="true" style="color: green"> Ampacity Rating Good </div>
               <div ng-switch-default style="color: red"> Current Above Rating </div>
